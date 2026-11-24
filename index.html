@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>BuyRacket.in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: announce bar, sticky header (wordmark, nav, search shortcut, cart), then one visible page at a time (home, shop, product, checkout, info) chosen by the URL hash. Cart is a side drawer. Dark look to match the black logo. */
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1d1d1d;
+  --fg: #f4f4f4;
+  --muted: #a3a3a3;
+  --line: #2a2a2a;
+  --lime: #a3e635;
+  --lime-fg: #0a0a0a;
+  --danger: #ff7b7b;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.in { max-width: 1120px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.12; }
+button, select, input, textarea { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--lime); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.announce { background: var(--lime); color: var(--lime-fg); font-size: 0.82rem; font-weight: 600; }
+.announce .in { padding-block: 8px; text-align: center; }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+header.top .in { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-block: 12px; }
+.brand { font-family: var(--font-display); font-weight: 700; font-style: italic; font-size: 1.45rem; text-decoration: none; white-space: nowrap; }
+.brand .r { color: var(--lime); }
+nav { display: flex; align-items: center; gap: 20px; }
+nav a { text-decoration: none; font-weight: 500; color: var(--muted); }
+nav a:hover, nav a[aria-current="page"] { color: var(--fg); }
+.cartbtn { background: var(--lime); color: var(--lime-fg); border: 0; border-radius: 8px; padding: 9px 14px; font-weight: 700; white-space: nowrap; }
+@media (max-width: 620px) { nav a { display: none; } }
+
+.page { padding-block: 32px 56px; }
+.crumbs { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+.crumbs a { color: var(--muted); }
+
+/* Home */
+.hero { display: grid; grid-template-columns: 1fr 1.1fr; gap: 28px; align-items: center; padding-block: 8px 24px; }
+@media (max-width: 800px) { .hero { grid-template-columns: 1fr; } .hero figure { order: -1; } }
+.eyebrow { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lime); }
+.hero h1 { font-size: clamp(2rem, 6vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; margin: 10px 0 14px; }
+.hero p { color: var(--muted); max-width: 50ch; margin: 0 0 22px; font-size: 1.05rem; }
+.hero figure { margin: 0; min-width: 0; }
+.hero img { width: 100%; max-width: 100%; height: auto; display: block; }
+.btn { display: inline-block; background: var(--lime); color: var(--lime-fg); font-weight: 700; text-decoration: none; padding: 12px 20px; border-radius: 8px; border: 0; }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+.btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); font-weight: 600; }
+.btn.ghost:hover { border-color: var(--lime); }
+.sec { margin-top: 44px; }
+.sec-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.sec-head h2 { font-size: 1.5rem; }
+.sec-head a { color: var(--lime); font-weight: 600; text-decoration: none; }
+.cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.cat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; text-align: left; color: var(--fg); min-width: 0; }
+.cat:hover { border-color: var(--lime); }
+.cat b { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+.cat span { color: var(--muted); font-size: 0.82rem; }
+.brands { display: flex; flex-wrap: wrap; gap: 10px; }
+.brandpill { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; font-family: var(--font-display); font-weight: 700; color: var(--fg); }
+.brandpill:hover { border-color: var(--lime); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: s; }
+@media (max-width: 700px) { .steps { grid-template-columns: 1fr; } }
+.steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; gap: 12px; min-width: 0; }
+.steps li::before { content: counter(s); flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--lime); color: var(--lime-fg); font-family: var(--font-display); font-weight: 700; display: grid; place-items: center; font-size: 0.9rem; }
+.steps b { display: block; font-family: var(--font-display); }
+.steps span { color: var(--muted); font-size: 0.9rem; }
+
+/* Product grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; position: relative; }
+.card .pic { display: block; aspect-ratio: 1 / 1; background: #0d0d0d; border: 0; padding: 0; width: 100%; }
+.card .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.card .body { padding: 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.kicker { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.card h3 { font-size: 1rem; }
+.card h3 a { text-decoration: none; }
+.card h3 a:hover { color: var(--lime); }
+.pricing { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+.price { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.mrp { color: var(--muted); text-decoration: line-through; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.off { background: var(--lime); color: var(--lime-fg); font-size: 0.72rem; font-weight: 700; border-radius: 4px; padding: 1px 6px; }
+.tagnew { position: absolute; top: 10px; left: 10px; background: #000c; color: var(--lime); border: 1px solid var(--lime); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; }
+.heart { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: #000b; color: var(--fg); font-size: 1.1rem; line-height: 1; }
+.heart[aria-pressed="true"] { color: #ff5d7a; }
+.card .act { display: flex; gap: 8px; margin-top: 10px; }
+.card .act .btn { flex: 1; text-align: center; padding: 9px 10px; font-size: 0.88rem; }
+
+/* Shop toolbar */
+.bar { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 14px; }
+@media (max-width: 600px) { .bar { grid-template-columns: 1fr; } }
+.field, select { width: 100%; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.chip { background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 500; }
+.chip[aria-pressed="true"] { background: var(--lime); color: var(--lime-fg); border-color: var(--lime); font-weight: 600; }
+.range { display: flex; align-items: center; gap: 12px; margin: 6px 0 18px; color: var(--muted); font-size: 0.9rem; flex-wrap: wrap; }
+.range input { accent-color: var(--lime); width: min(280px, 100%); }
+.count { color: var(--muted); font-size: 0.9rem; margin-bottom: 12px; }
+.none { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 28px; text-align: center; color: var(--muted); }
+
+/* Product page */
+.pd { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+@media (max-width: 800px) { .pd { grid-template-columns: 1fr; gap: 20px; } }
+.pd > * { min-width: 0; }
+.pd .big { background: #0d0d0d; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; aspect-ratio: 1 / 1; }
+.pd .big img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pd h1 { font-size: clamp(1.5rem, 4vw, 2rem); margin: 6px 0 12px; }
+.pd .price { font-size: 1.8rem; }
+.pd p { color: var(--muted); }
+.lbl { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; display: block; }
+.qty { display: inline-flex; align-items: center; border: 1.5px solid var(--lime); border-radius: 8px; overflow: hidden; }
+.qty button { background: transparent; color: var(--lime); border: 0; width: 36px; height: 36px; font-size: 1.15rem; font-weight: 700; }
+.qty span { min-width: 32px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pd .acts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+.specs { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 0.92rem; }
+.specs th, .specs td { text-align: left; padding: 9px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.specs th { color: var(--muted); font-weight: 500; width: 40%; padding-right: 12px; }
+
+/* Drawer */
+.veil { position: fixed; inset: 0; background: #000a; z-index: 40; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100%); background: var(--surface); border-left: 1px solid var(--line); z-index: 41; display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.drawer .dh { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--line); }
+.drawer .dh h2 { font-size: 1.2rem; }
+.x { background: transparent; color: var(--fg); border: 1px solid var(--line); border-radius: 8px; width: 36px; height: 36px; font-size: 1.1rem; }
+.drawer .db { flex: 1; overflow-y: auto; padding: 8px 16px; }
+.drawer .df { padding: 16px; border-top: 1px solid var(--line); }
+.ci { display: grid; grid-template-columns: 64px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ci img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; display: block; background: #0d0d0d; }
+.ci > div { min-width: 0; }
+.ci b { display: block; font-size: 0.92rem; line-height: 1.3; }
+.ci small { color: var(--muted); display: block; }
+.ci .r2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.ci .qty button { width: 28px; height: 28px; }
+.ci .qty span { min-width: 26px; }
+.rm { background: transparent; border: 0; color: var(--muted); text-decoration: underline; padding: 4px; font-size: 0.82rem; }
+.sum { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.sum div { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); }
+.sum .tot { color: var(--fg); font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; padding-top: 8px; border-top: 1px solid var(--line); margin-top: 4px; }
+.free { color: var(--lime); }
+
+/* Checkout */
+.co { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; }
+@media (max-width: 860px) { .co { grid-template-columns: 1fr; } }
+.co > div { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; }
+.co h2 { font-size: 1.25rem; margin-bottom: 14px; }
+.f { margin-bottom: 14px; }
+.f label, .f .lbl { margin: 0 0 6px; }
+.f label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.f input, .f textarea, .f select { width: 100%; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.f textarea { min-height: 80px; resize: vertical; }
+.f.bad input, .f.bad select, .f.bad textarea { border-color: var(--danger); }
+.err { color: var(--danger); font-size: 0.82rem; margin-top: 4px; min-height: 0; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
+.pay { display: grid; gap: 8px; }
+.pay label { display: flex; gap: 10px; align-items: flex-start; text-transform: none; letter-spacing: 0; font-size: 0.95rem; font-weight: 500; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 0; }
+.pay input { width: auto; margin-top: 4px; accent-color: var(--lime); }
+.pay small { display: block; color: var(--muted); font-weight: 400; }
+.status { min-height: 1.4em; font-size: 0.88rem; color: var(--lime); margin-top: 10px; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: 10px 0 0; }
+.acts2 { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+
+/* Info */
+.info { max-width: 68ch; }
+.info h1 { font-size: 2rem; margin-bottom: 18px; }
+.info h2 { font-size: 1.25rem; margin: 28px 0 8px; }
+.info p, .info li { color: var(--muted); }
+.info strong { color: var(--fg); }
+
+footer.bot { border-top: 1px solid var(--line); background: var(--surface); }
+footer.bot .in { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding-block: 28px; font-size: 0.9rem; color: var(--muted); }
+footer.bot b { font-family: var(--font-display); font-size: 1.05rem; color: var(--fg); display: block; margin-bottom: 4px; }
+footer.bot a { display: block; text-decoration: none; }
+footer.bot a:hover { color: var(--lime); }
+footer.bot div { min-width: 0; }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--lime); color: var(--lime-fg); font-weight: 600; padding: 10px 18px; border-radius: 8px; z-index: 60; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .card { transition: transform .15s, border-color .15s; } .card:hover { transform: translateY(-2px); border-color: var(--lime); } }
+</style>
+</head>
+<body>
+
+<div class="announce"><div class="in" id="promo"></div></div>
+
+<header class="top">
+  <div class="in">
+    <a class="brand" href="#home">Buy<span class="r">Racket</span>.in</a>
+    <nav aria-label="Main">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#shop" data-nav="shop">Shop</a>
+      <a href="#info" data-nav="info">About &amp; delivery</a>
+      <button class="cartbtn" id="opencart" type="button" aria-label="Open cart">Cart (<span id="count">0</span>)</button>
+    </nav>
+  </div>
+</header>
+
+<main class="in page" id="view" tabindex="-1"></main>
+
+<footer class="bot">
+  <div class="in">
+    <div><b>BuyRacket.in</b>Everything badminton. One destination.</div>
+    <div><b>Shop</b><a href="#shop">All products</a><a href="#info">About &amp; delivery</a></div>
+    <div><b>Contact</b><span id="shopnum"></span><br>WhatsApp, 9 am to 8 pm</div>
+  </div>
+</footer>
+
+<div id="veil" class="veil" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="Your cart" hidden>
+  <div class="dh"><h2>Your cart</h2><button class="x" id="closecart" type="button" aria-label="Close cart">✕</button></div>
+  <div class="db" id="dbody"></div>
+  <div class="df" id="dfoot"></div>
+</aside>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+// ===== Edit this block to make the shop yours =====
+var SHOP = {
+  name: "BuyRacket.in",
+  whatsapp: "919999999999",          // country code + number, digits only
+  promo: "Free delivery across Kerala on orders above ₹2,499",
+  freeAbove: 2499,
+  shippingFee: 99
+};
+var DISTRICTS = ["Thiruvananthapuram","Kollam","Pathanamthitta","Alappuzha","Kottayam","Idukki","Ernakulam","Thrissur","Palakkad","Malappuram","Kozhikode","Wayanad","Kannur","Kasaragod"];
+var CATS = [
+  { id: "Rackets", note: "Head heavy, even and speed frames" },
+  { id: "Shoes", note: "Non-marking court shoes" },
+  { id: "Shuttlecocks", note: "Feather and nylon tubes" },
+  { id: "Strings", note: "Power and control" },
+  { id: "Grips", note: "Overgrips and towel grips" },
+  { id: "Bags", note: "Kitbags and backpacks" },
+  { id: "Accessories", note: "Socks, wristbands and more" }
+];
+var BRAND_COLOR = { Yonex: "#38bdf8", Victor: "#f43f5e", "Li-Ning": "#f59e0b", Apacs: "#a3e635" };
+// Sample products and prices. Replace with your real list.
+var PRODUCTS = [
+  { id: "yonex-astrox-100zz", name: "Yonex Astrox 100 ZZ", brand: "Yonex", cat: "Rackets", price: 16890, mrp: 21490, tag: "best",
+    desc: "Built for steep, continuous attack. Head heavy balance and an extra stiff shaft for strong smashes.",
+    specs: [["Weight / grip", "4U (about 83 g) / G5"], ["Balance", "Head heavy"], ["Flex", "Extra stiff"], ["Max string tension", "28 lbs"]],
+    variants: ["4U G5, unstrung", "4U G5, strung (26 lbs)", "3U G5, unstrung"] },
+  { id: "yonex-nanoflare-800-pro", name: "Yonex Nanoflare 800 Pro", brand: "Yonex", cat: "Rackets", price: 15990, mrp: 19990, tag: "new",
+    desc: "Fast, flat-game frame for quick drives and counter-attacks.",
+    specs: [["Weight / grip", "4U (about 83 g) / G5"], ["Balance", "Head light"], ["Flex", "Stiff"], ["Max string tension", "28 lbs"]],
+    variants: ["4U G5, unstrung", "4U G5, strung (26 lbs)", "3U G5, unstrung"] },
+  { id: "victor-thruster-ryuga-2", name: "Victor Thruster Ryuga II", brand: "Victor", cat: "Rackets", price: 14750, mrp: 18500, tag: "best",
+    desc: "Head heavy power racket with a stable feel for rear-court smashes.",
+    specs: [["Weight / grip", "4U / G5"], ["Balance", "Head heavy"], ["Flex", "Stiff"], ["Max string tension", "31 lbs"]],
+    variants: ["4U G5, unstrung", "4U G5, strung (27 lbs)"] },
+  { id: "lining-axforce-90", name: "Li-Ning Axforce 90 Dragon Max", brand: "Li-Ning", cat: "Rackets", price: 16490, mrp: 20990, tag: "new",
+    desc: "Thin, flexible shaft with a stable frame for power transfer and net control.",
+    specs: [["Weight / grip", "4U (80 to 84 g) / G5"], ["Balance", "Head heavy"], ["Flex", "Stiff"], ["Max string tension", "30 lbs"]],
+    variants: ["4U G5, unstrung", "4U G5, strung (27 lbs)"] },
+  { id: "apacs-z-ziggler-force-2", name: "Apacs Z-Ziggler Force II", brand: "Apacs", cat: "Rackets", price: 3190, mrp: 4990, tag: "best",
+    desc: "Value racket for club players. Handles up to 38 lbs string tension.",
+    specs: [["Weight / grip", "4U (85 g) / G2"], ["Balance", "Slightly head heavy"], ["Flex", "Medium stiff"], ["Max string tension", "38 lbs"]],
+    variants: ["4U, unstrung", "4U, strung (25 lbs)"] },
+  { id: "yonex-power-cushion-65z3", name: "Yonex Power Cushion 65 Z3", brand: "Yonex", cat: "Shoes", price: 9890, mrp: 12990, tag: "best",
+    desc: "All-round court shoe with cushioning and a grippy non-marking sole for wooden and synthetic courts.",
+    specs: [["Weight", "About 310 g (UK 8.5)"], ["Sole", "Non-marking gum rubber"], ["Cushioning", "Power Cushion+"], ["Upper", "Mesh with synthetic leather"]],
+    variants: ["UK 7", "UK 8", "UK 8.5", "UK 9", "UK 10"] },
+  { id: "victor-a970-nitrolite", name: "Victor A970 NitroLite", brand: "Victor", cat: "Shoes", price: 9290, mrp: 11800, tag: "new",
+    desc: "Light, responsive midsole with good ankle hold for fast lunges.",
+    specs: [["Weight", "About 295 g (UK 8.5)"], ["Sole", "Anti-slip rubber"], ["Midsole", "Nitrogen foam"], ["Upper", "Microfibre with mesh"]],
+    variants: ["UK 7.5", "UK 8", "UK 9", "UK 10"] },
+  { id: "yonex-aerosensa-50", name: "Yonex Aerosensa 50 Feather Shuttles", brand: "Yonex", cat: "Shuttlecocks", price: 3190, mrp: 3690, tag: "best",
+    desc: "Goose feather tournament shuttles with a cork base. Pick the speed that suits your hall.",
+    specs: [["Pack", "12 shuttles per tube"], ["Feathers", "Goose feather"], ["Base", "Cork"]],
+    variants: ["Speed 76 (warm halls)", "Speed 77 (cooler halls)"] },
+  { id: "yonex-bg65-titanium", name: "Yonex BG65 Titanium String", brand: "Yonex", cat: "Strings", price: 590, mrp: 750, tag: "best",
+    desc: "Crisp hitting sound and good durability for hard hitters.",
+    specs: [["Gauge", "0.70 mm"], ["Length", "10 m set"], ["Recommended tension", "Up to 30 lbs"]],
+    variants: ["White", "Neon yellow", "Black"] },
+  { id: "yonex-super-grap-ac102", name: "Yonex Super Grap AC102EX Overgrip", brand: "Yonex", cat: "Grips", price: 420, mrp: 540, tag: "best",
+    desc: "Tacky polyurethane overgrip that absorbs sweat during long matches.",
+    specs: [["Pack", "3 grips"], ["Thickness", "0.6 mm"], ["Material", "Polyurethane"]],
+    variants: ["Neon green", "White", "Black", "Assorted"] },
+  { id: "lining-pro-thermal-kitbag", name: "Li-Ning Pro Thermal Kitbag", brand: "Li-Ning", cat: "Bags", price: 4890, mrp: 6490, tag: "new",
+    desc: "Three compartments with a thermal lining to protect rackets from heat, plus a shoe pocket.",
+    specs: [["Size", "76 x 30 x 32 cm"], ["Compartments", "3 main plus shoe pocket"], ["Lining", "Thermal foil"], ["Straps", "Padded backpack straps"]],
+    variants: ["Black and neon", "Blue and gold"] },
+  { id: "victor-sk163-socks", name: "Victor SK163 Cushioned Socks", brand: "Victor", cat: "Accessories", price: 360, mrp: 490, tag: "",
+    desc: "Thick terry sole and arch support to reduce blisters during fast footwork.",
+    specs: [["Size", "Free size (UK 6 to 10)"], ["Pack", "1 pair"], ["Material", "Cotton, nylon and spandex blend"]],
+    variants: ["Black and neon", "White and black"] }
+];
+// ===== End of editable block =====
+
+var state = { cat: "All", brand: "All", q: "", sort: "featured", max: 25000, qty: 1, variant: {}, pay: "COD" };
+var cart = [], wish = [];
+var ORDER_REF = "BR-" + new Date().toISOString().slice(2, 10).replace(/-/g, "") + "-" + Math.floor(1000 + Math.random() * 9000);
+
+function $(id) { return document.getElementById(id); }
+function inr(n) { return "₹" + Number(n).toLocaleString("en-IN"); }
+function pct(p) { return p.mrp > p.price ? Math.round((p.mrp - p.price) / p.mrp * 100) : 0; }
+function byId(id) { return PRODUCTS.filter(function (p) { return p.id === id; })[0]; }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+
+// ----- product artwork (drawn in SVG, no image files needed) -----
+function art(p) {
+  var c = BRAND_COLOR[p.brand] || "#a3e635", g = "#a3e635", body = "";
+  if (p.cat === "Rackets") {
+    var lines = ""; for (var i = 0; i < 7; i++) lines += '<line x1="' + (160 + i * 13) + '" y1="40" x2="' + (160 + i * 13) + '" y2="205"/>';
+    for (var j = 0; j < 6; j++) lines += '<line x1="140" y1="' + (80 + j * 18) + '" x2="262" y2="' + (80 + j * 18) + '"/>';
+    body = '<g transform="rotate(-35 200 200)"><ellipse cx="200" cy="122" rx="64" ry="86" fill="none" stroke="' + c + '" stroke-width="9"/><g stroke="#fff" stroke-opacity=".3">' + lines + '</g><path d="M188 205L200 218L212 205" fill="none" stroke="' + c + '" stroke-width="6" stroke-linecap="round"/><rect x="196" y="214" width="8" height="92" rx="3" fill="#e2e8f0"/><rect x="191" y="306" width="18" height="70" rx="3" fill="' + g + '"/></g>';
+  } else if (p.cat === "Shoes") {
+    body = '<path d="M62 246C62 215 90 188 126 185L172 148C186 148 200 164 218 166L248 146C264 175 318 205 340 232C348 244 342 262 324 264L78 264C66 264 62 256 62 246Z" fill="#181c28" stroke="' + c + '" stroke-width="4"/><path d="M64 252L338 252L332 270L68 270Z" fill="' + g + '"/><path d="M128 215L232 195L274 235" fill="none" stroke="' + c + '" stroke-width="7" stroke-linecap="round"/>';
+  } else if (p.cat === "Shuttlecocks") {
+    body = '<rect x="150" y="70" width="100" height="250" rx="14" fill="#161b26" stroke="' + c + '" stroke-width="4"/><rect x="150" y="70" width="100" height="32" rx="10" fill="' + g + '"/><rect x="150" y="165" width="100" height="62" fill="' + c + '" fill-opacity=".22"/><text x="200" y="203" text-anchor="middle" fill="#fff" font-family="sans-serif" font-size="16" font-weight="800">' + esc(p.brand.toUpperCase()) + '</text>';
+  } else if (p.cat === "Strings") {
+    body = '<circle cx="200" cy="190" r="100" fill="#171c28" stroke="' + c + '" stroke-width="5"/><circle cx="200" cy="190" r="62" fill="none" stroke="' + g + '" stroke-width="3" stroke-dasharray="10 6"/><circle cx="200" cy="190" r="16" fill="#0a0a0a" stroke="' + c + '" stroke-width="3"/>';
+  } else if (p.cat === "Grips") {
+    body = '<rect x="110" y="150" width="180" height="90" rx="45" fill="#171c28" stroke="' + c + '" stroke-width="5"/><rect x="132" y="172" width="136" height="46" rx="23" fill="none" stroke="' + g + '" stroke-width="3" stroke-dasharray="8 6"/>';
+  } else if (p.cat === "Bags") {
+    body = '<rect x="90" y="140" width="220" height="130" rx="22" fill="#171c28" stroke="' + c + '" stroke-width="5"/><path d="M150 140C150 110 250 110 250 140" fill="none" stroke="' + g + '" stroke-width="7" stroke-linecap="round"/><rect x="110" y="190" width="180" height="10" fill="' + g + '"/>';
+  } else {
+    body = '<path d="M150 90H235V210C235 240 270 250 270 280L270 300L130 300L130 270C130 250 150 235 150 210Z" fill="#171c28" stroke="' + c + '" stroke-width="5"/><rect x="150" y="90" width="85" height="26" fill="' + g + '"/>';
+  }
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#0d0f14"/>' + body +
+    '<text x="22" y="378" fill="#94a3b8" font-family="sans-serif" font-size="13" font-weight="700" letter-spacing="2">' + esc(p.brand.toUpperCase()) + '</text></svg>';
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+
+// ----- cart -----
+function saveCart() { store("br_cart", cart); store("br_wish", wish); }
+function cartCount() { return cart.reduce(function (s, i) { return s + i.qty; }, 0); }
+function subtotal() { return cart.reduce(function (s, i) { return s + byId(i.id).price * i.qty; }, 0); }
+function delivery() { var s = subtotal(); return s === 0 ? 0 : (s >= SHOP.freeAbove ? 0 : SHOP.shippingFee); }
+function addToCart(id, variant, qty) {
+  var p = byId(id); variant = variant || p.variants[0]; qty = qty || 1;
+  var found = cart.filter(function (i) { return i.id === id && i.variant === variant; })[0];
+  if (found) found.qty = Math.min(20, found.qty + qty); else cart.push({ id: id, variant: variant, qty: qty });
+  saveCart(); renderCartBits(); toast("Added to cart");
+}
+function changeQty(idx, d) { cart[idx].qty += d; if (cart[idx].qty <= 0) cart.splice(idx, 1); else cart[idx].qty = Math.min(20, cart[idx].qty); saveCart(); renderCartBits(); if (curPage() === "checkout") render(); }
+function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2200); }
+function toggleWish(id) { var i = wish.indexOf(id); if (i < 0) { wish.push(id); toast("Saved"); } else { wish.splice(i, 1); toast("Removed from saved"); } saveCart(); render(); }
+
+function summaryHtml() {
+  var s = subtotal(), d = delivery();
+  return '<div class="sum"><div><span>Subtotal</span><span>' + inr(s) + '</span></div>' +
+    '<div><span>Delivery</span><span class="' + (d === 0 && s > 0 ? "free" : "") + '">' + (s === 0 ? "-" : d === 0 ? "Free" : inr(d)) + '</span></div>' +
+    (s > 0 && d > 0 ? '<div><span>Add ' + inr(SHOP.freeAbove - s) + ' more for free delivery</span><span></span></div>' : "") +
+    '<div class="tot"><span>Total</span><span>' + inr(s + d) + '</span></div></div>';
+}
+function cartLinesHtml(editable) {
+  return cart.map(function (i, idx) {
+    var p = byId(i.id);
+    return '<div class="ci"><img src="' + art(p) + '" alt=""><div><b>' + esc(p.name) + '</b><small>' + esc(i.variant) + '</small>' +
+      '<div class="r2"><div class="qty"><button type="button" data-q="' + idx + '" data-d="-1" aria-label="One less">−</button><span>' + i.qty + '</span><button type="button" data-q="' + idx + '" data-d="1" aria-label="One more">+</button></div>' +
+      '<strong>' + inr(p.price * i.qty) + '</strong></div></div></div>';
+  }).join("");
+}
+function renderCartBits() {
+  $("count").textContent = cartCount();
+  $("dbody").innerHTML = cart.length ? cartLinesHtml() : '<p class="hint" style="padding:16px 0">Your cart is empty.</p>';
+  $("dfoot").innerHTML = cart.length ? summaryHtml() + '<div style="margin-top:14px"><a class="btn" style="display:block;text-align:center" href="#checkout" id="gocheckout">Checkout</a></div>' : '<a class="btn" style="display:block;text-align:center" href="#shop" id="goshop">Browse products</a>';
+}
+function openCart() { $("veil").hidden = false; $("drawer").hidden = false; $("closecart").focus(); }
+function closeCart() { $("veil").hidden = true; $("drawer").hidden = true; }
+
+// ----- cards -----
+function cardHtml(p) {
+  var off = pct(p), saved = wish.indexOf(p.id) >= 0;
+  return '<article class="card">' + (p.tag === "new" ? '<span class="tagnew">New</span>' : "") +
+    '<button class="heart" type="button" data-wish="' + p.id + '" aria-pressed="' + saved + '" aria-label="Save ' + esc(p.name) + '">' + (saved ? "♥" : "♡") + '</button>' +
+    '<a class="pic" href="#product-' + p.id + '" aria-label="' + esc(p.name) + '"><img src="' + art(p) + '" alt="' + esc(p.name) + '" loading="lazy"></a>' +
+    '<div class="body"><span class="kicker">' + esc(p.brand) + ' · ' + esc(p.cat) + '</span><h3><a href="#product-' + p.id + '">' + esc(p.name) + '</a></h3>' +
+    '<div class="pricing"><span class="price">' + inr(p.price) + '</span>' + (off ? '<span class="mrp">' + inr(p.mrp) + '</span><span class="off">-' + off + '%</span>' : "") + '</div>' +
+    '<div class="act"><a class="btn ghost" href="#product-' + p.id + '">Details</a><button class="btn" type="button" data-add="' + p.id + '">Add</button></div></div></article>';
+}
+
+// ----- pages -----
+function pageHome() {
+  var best = PRODUCTS.filter(function (p) { return p.tag === "best"; }).slice(0, 4);
+  var brands = Object.keys(BRAND_COLOR);
+  return '<div class="hero"><div><div class="eyebrow">Badminton store · Delivery across Kerala</div><h1>Everything badminton. One destination.</h1>' +
+    '<p>Rackets, shoes, shuttles, strings and accessories. Add what you need, enter your address, and send the order to us on WhatsApp. We confirm everything before dispatch.</p>' +
+    '<a class="btn" href="#shop">Shop now</a></div><figure><img src="logo.png" alt="BuyRacket.in. Everything badminton. One destination." width="1476" height="643"></figure></div>' +
+    '<section class="sec"><div class="sec-head"><h2>Shop by category</h2></div><div class="cats">' +
+    CATS.map(function (c) { return '<button class="cat" type="button" data-gocat="' + c.id + '"><b>' + c.id + '</b><span>' + c.note + '</span></button>'; }).join("") + '</div></section>' +
+    '<section class="sec"><div class="sec-head"><h2>Popular right now</h2><a href="#shop">See all</a></div><div class="grid">' + best.map(cardHtml).join("") + '</div></section>' +
+    '<section class="sec"><div class="sec-head"><h2>Brands</h2></div><div class="brands">' +
+    brands.map(function (b) { return '<button class="brandpill" type="button" data-gobrand="' + b + '">' + b + '</button>'; }).join("") + '</div></section>' +
+    '<section class="sec"><div class="sec-head"><h2>How ordering works</h2></div><ol class="steps">' +
+    '<li><div><b>Choose products</b><span>Add items to your cart.</span></div></li>' +
+    '<li><div><b>Send on WhatsApp</b><span>Your order opens in WhatsApp, ready to send.</span></div></li>' +
+    '<li><div><b>We confirm and dispatch</b><span>Pay on delivery or by UPI once confirmed.</span></div></li></ol></section>';
+}
+
+function filtered() {
+  var q = state.q.trim().toLowerCase();
+  var list = PRODUCTS.filter(function (p) {
+    if (state.cat !== "All" && p.cat !== state.cat) return false;
+    if (state.brand !== "All" && p.brand !== state.brand) return false;
+    if (p.price > state.max) return false;
+    if (q && (p.name + " " + p.brand + " " + p.cat).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  list.sort(function (a, b) {
+    if (state.sort === "low") return a.price - b.price;
+    if (state.sort === "high") return b.price - a.price;
+    if (state.sort === "off") return pct(b) - pct(a);
+    return (b.tag === "best") - (a.tag === "best");
+  });
+  return list;
+}
+function chipRow(items, current, attr) {
+  return items.map(function (x) { return '<button class="chip" type="button" ' + attr + '="' + x + '" aria-pressed="' + (x === current) + '">' + x + '</button>'; }).join("");
+}
+function pageShop() {
+  var list = filtered();
+  return '<h1 style="font-size:2rem;margin-bottom:16px">Shop</h1>' +
+    '<div class="bar"><div><label class="sr" for="q">Search products</label><input class="field" id="q" type="search" placeholder="Search rackets, brands, shoes" value="' + esc(state.q) + '"></div>' +
+    '<div><label class="sr" for="sort">Sort</label><select id="sort"><option value="featured">Popular first</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="off">Biggest discount</option></select></div></div>' +
+    '<div class="chips" role="group" aria-label="Category">' + chipRow(["All"].concat(CATS.map(function (c) { return c.id; })), state.cat, "data-cat") + '</div>' +
+    '<div class="chips" role="group" aria-label="Brand">' + chipRow(["All"].concat(Object.keys(BRAND_COLOR)), state.brand, "data-brand") + '</div>' +
+    '<div class="range"><label for="max">Max price</label><input id="max" type="range" min="500" max="25000" step="500" value="' + state.max + '"><strong id="maxv">' + inr(state.max) + '</strong></div>' +
+    '<div id="res">' + resHtml(list) + '</div>';
+}
+function resHtml(list) {
+  return '<div class="count">' + list.length + ' product' + (list.length === 1 ? "" : "s") + '</div>' +
+    (list.length ? '<div class="grid">' + list.map(cardHtml).join("") + '</div>' : '<div class="none">No products match. <button class="rm" type="button" id="reset">Clear filters</button></div>');
+}
+
+function pageProduct(id) {
+  var p = byId(id);
+  if (!p) return '<div class="none">Product not found. <a href="#shop" style="color:var(--lime)">Back to shop</a></div>';
+  var v = state.variant[id] || p.variants[0], off = pct(p), saved = wish.indexOf(p.id) >= 0;
+  return '<div class="crumbs"><a href="#shop">Shop</a> / ' + esc(p.cat) + '</div><div class="pd"><div class="big"><img src="' + art(p) + '" alt="' + esc(p.name) + '"></div><div>' +
+    '<span class="kicker">' + esc(p.brand) + ' · ' + esc(p.cat) + '</span><h1>' + esc(p.name) + '</h1>' +
+    '<div class="pricing" style="padding-top:0"><span class="price">' + inr(p.price) + '</span>' + (off ? '<span class="mrp">' + inr(p.mrp) + '</span><span class="off">-' + off + '%</span>' : "") + '</div>' +
+    '<p>' + esc(p.desc) + '</p><span class="lbl">Option</span><div class="chips">' +
+    p.variants.map(function (x) { return '<button class="chip" type="button" data-var="' + esc(x) + '" aria-pressed="' + (x === v) + '">' + esc(x) + '</button>'; }).join("") + '</div>' +
+    '<span class="lbl">Quantity</span><div class="qty"><button type="button" id="qminus" aria-label="One less">−</button><span id="qval">' + state.qty + '</span><button type="button" id="qplus" aria-label="One more">+</button></div>' +
+    '<div class="acts"><button class="btn" type="button" id="padd">Add to cart</button><button class="btn ghost" type="button" id="pnow">Order now</button><button class="btn ghost" type="button" data-wish="' + p.id + '" aria-pressed="' + saved + '">' + (saved ? "♥ Saved" : "♡ Save") + '</button></div>' +
+    '<table class="specs"><tbody>' + p.specs.map(function (s) { return '<tr><th scope="row">' + esc(s[0]) + '</th><td>' + esc(s[1]) + '</td></tr>'; }).join("") + '</tbody></table></div></div>';
+}
+
+var form = { name: "", phone: "", district: "", pin: "", addr: "", note: "" };
+function pageCheckout() {
+  if (!cart.length) return '<div class="none">Your cart is empty. <a href="#shop" style="color:var(--lime)">Browse products</a></div>';
+  return '<h1 style="font-size:2rem;margin-bottom:16px">Checkout</h1><div class="co"><div><h2>Delivery details</h2>' +
+    '<div class="f" id="f-name"><label for="name">Name</label><input id="name" autocomplete="name" value="' + esc(form.name) + '"><div class="err"></div></div>' +
+    '<div class="f" id="f-phone"><label for="phone">Phone (WhatsApp)</label><input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile number" value="' + esc(form.phone) + '"><div class="err"></div></div>' +
+    '<div class="two"><div class="f" id="f-district"><label for="district">District</label><select id="district"><option value="">Choose district</option>' +
+    DISTRICTS.map(function (d) { return '<option' + (d === form.district ? " selected" : "") + '>' + d + '</option>'; }).join("") + '</select><div class="err"></div></div>' +
+    '<div class="f" id="f-pin"><label for="pin">PIN code</label><input id="pin" inputmode="numeric" maxlength="6" autocomplete="postal-code" placeholder="6 digits" value="' + esc(form.pin) + '"><div class="err"></div></div></div>' +
+    '<div class="f" id="f-addr"><label for="addr">Address</label><textarea id="addr" autocomplete="street-address" placeholder="House name or number, street, area">' + esc(form.addr) + '</textarea><div class="err"></div></div>' +
+    '<div class="f"><label for="note">Note (optional)</label><input id="note" placeholder="String tension, grip size, landmark" value="' + esc(form.note) + '"></div>' +
+    '<span class="lbl" style="margin-top:4px">Payment</span><div class="pay">' +
+    '<label><input type="radio" name="pay" value="COD"' + (state.pay === "COD" ? " checked" : "") + '><span>Pay on delivery<small>Pay cash or UPI to the delivery person.</small></span></label>' +
+    '<label><input type="radio" name="pay" value="UPI"' + (state.pay === "UPI" ? " checked" : "") + '><span>Pay by UPI before dispatch<small>We send the UPI details on WhatsApp after confirming.</small></span></label></div></div>' +
+    '<div><h2>Your order</h2>' + cartLinesHtml() + '<div style="margin-top:14px">' + summaryHtml() + '</div>' +
+    '<div class="acts2" style="margin-top:18px"><a class="btn" id="wa" href="#" target="_blank" rel="noopener" aria-disabled="true">Order on WhatsApp</a><button class="btn ghost" type="button" id="copy">Copy order text</button></div>' +
+    '<div class="status" id="status" role="status"></div><p class="hint">The order is placed only after you press send in WhatsApp. We reply to confirm price and delivery date.</p></div></div>';
+}
+
+function pageInfo() {
+  return '<div class="info"><h1>About and delivery</h1>' +
+    '<p>BuyRacket.in is a badminton store. We sell rackets, shoes, shuttles, strings, grips, bags and accessories, and take orders on WhatsApp.</p>' +
+    '<h2>How to order</h2><p>Add products to your cart, fill in your delivery details at checkout, and press <strong>Order on WhatsApp</strong>. Your order opens in WhatsApp with everything typed in. Press send. We confirm the price, stock and delivery date with you before dispatch.</p>' +
+    '<h2>Delivery</h2><p>We deliver within Kerala only (PIN codes starting 67, 68 or 69). Delivery is free above ' + inr(SHOP.freeAbove) + '. Below that it costs ' + inr(SHOP.shippingFee) + '. Most orders arrive in 2 to 4 working days.</p>' +
+    '<h2>Payment</h2><p>Pay on delivery, or by UPI before dispatch. We share UPI details on WhatsApp once your order is confirmed.</p>' +
+    '<h2>Returns</h2><p>Unused items in original packaging can be replaced within 7 days. Strung rackets are strung to the tension you choose and cannot be returned once strung.</p>' +
+    '<h2>Contact</h2><p>WhatsApp <strong>+' + esc(SHOP.whatsapp) + '</strong>, daily from 9 am to 8 pm.</p></div>';
+}
+
+// ----- router -----
+function curPage() { var h = location.hash.slice(1) || "home"; return h.indexOf("product-") === 0 ? "product" : h; }
+function render() {
+  var h = location.hash.slice(1) || "home", pg = curPage(), html;
+  if (pg === "shop") html = pageShop();
+  else if (pg === "product") html = pageProduct(h.slice(8));
+  else if (pg === "checkout") html = pageCheckout();
+  else if (pg === "info") html = pageInfo();
+  else html = pageHome();
+  $("view").innerHTML = html;
+  var navs = document.querySelectorAll("[data-nav]");
+  for (var i = 0; i < navs.length; i++) { if (navs[i].getAttribute("data-nav") === pg) navs[i].setAttribute("aria-current", "page"); else navs[i].removeAttribute("aria-current"); }
+  if (pg === "shop") $("sort").value = state.sort;
+  if (pg === "checkout") updateCheckout(false);
+}
+window.addEventListener("hashchange", function () { state.qty = 1; closeCart(); render(); window.scrollTo(0, 0); });
+
+// ----- checkout logic -----
+function validate() {
+  var e = {};
+  if (form.name.trim().length < 2) e.name = "Enter your name.";
+  var ph = form.phone.replace(/[\s-]/g, "").replace(/^\+?91/, "");
+  if (!/^[6-9]\d{9}$/.test(ph)) e.phone = "Enter a 10-digit mobile number.";
+  if (!form.district) e.district = "Choose your district.";
+  if (!/^6[789]\d{4}$/.test(form.pin.trim())) e.pin = "We deliver only in Kerala. PIN codes start with 67, 68 or 69.";
+  if (form.addr.trim().length < 8) e.addr = "Enter your full address.";
+  return e;
+}
+function orderText() {
+  var lines = cart.map(function (i, n) { var p = byId(i.id); return (n + 1) + ". " + p.name + " (" + i.variant + ") x " + i.qty + " = " + inr(p.price * i.qty); });
+  var s = subtotal(), d = delivery();
+  return "New order for " + SHOP.name + "\nOrder ref: " + ORDER_REF + "\n\n" + lines.join("\n") + "\n\nSubtotal: " + inr(s) + "\nDelivery: " + (d ? inr(d) : "Free") + "\nTotal: " + inr(s + d) +
+    "\nPayment: " + (state.pay === "COD" ? "Pay on delivery" : "UPI before dispatch") +
+    "\n\nName: " + form.name.trim() + "\nPhone: " + form.phone.trim() + "\nAddress: " + form.addr.trim() + ", " + form.district + " - " + form.pin.trim() + (form.note.trim() ? "\nNote: " + form.note.trim() : "");
+}
+function updateCheckout(showErrors) {
+  var wa = $("wa"); if (!wa) return;
+  var e = validate(), ok = Object.keys(e).length === 0;
+  ["name", "phone", "district", "pin", "addr"].forEach(function (k) {
+    var box = $("f-" + k), bad = !!e[k] && (showErrors || box.dataset.touched === "1");
+    box.className = "f" + (bad ? " bad" : ""); box.querySelector(".err").textContent = bad ? e[k] : "";
+  });
+  wa.setAttribute("aria-disabled", ok ? "false" : "true");
+  wa.href = ok ? "https://wa.me/" + SHOP.whatsapp + "?text=" + encodeURIComponent(orderText()) : "#";
+}
+
+// ----- events -----
+document.addEventListener("click", function (ev) {
+  var t = ev.target, b;
+  if ((b = t.closest("[data-add]"))) { addToCart(b.dataset.add); return; }
+  if ((b = t.closest("[data-wish]"))) { toggleWish(b.dataset.wish); return; }
+  if ((b = t.closest("[data-q]"))) { changeQty(+b.dataset.q, +b.dataset.d); return; }
+  if ((b = t.closest("[data-gocat]"))) { state.cat = b.dataset.gocat; state.brand = "All"; location.hash = "shop"; if (curPage() === "shop") render(); return; }
+  if ((b = t.closest("[data-gobrand]"))) { state.brand = b.dataset.gobrand; state.cat = "All"; location.hash = "shop"; if (curPage() === "shop") render(); return; }
+  if ((b = t.closest("[data-cat]"))) { state.cat = b.dataset.cat; render(); return; }
+  if ((b = t.closest("[data-brand]"))) { state.brand = b.dataset.brand; render(); return; }
+  if ((b = t.closest("[data-var]"))) { state.variant[location.hash.slice(9)] = b.dataset.var; render(); return; }
+  if (t.closest("#reset")) { state.cat = "All"; state.brand = "All"; state.q = ""; state.max = 25000; render(); return; }
+  if (t.closest("#qminus")) { state.qty = Math.max(1, state.qty - 1); $("qval").textContent = state.qty; return; }
+  if (t.closest("#qplus")) { state.qty = Math.min(20, state.qty + 1); $("qval").textContent = state.qty; return; }
+  if (t.closest("#padd") || t.closest("#pnow")) {
+    var id = location.hash.slice(9);
+    addToCart(id, state.variant[id], state.qty); state.qty = 1;
+    if (t.closest("#pnow")) location.hash = "checkout"; else { $("qval").textContent = 1; openCart(); }
+    return;
+  }
+  if (t.closest("#opencart")) { openCart(); return; }
+  if (t.closest("#closecart") || t.closest("#veil") || t.closest("#gocheckout") || t.closest("#goshop")) { closeCart(); return; }
+  if (t.closest("#wa")) {
+    if ($("wa").getAttribute("aria-disabled") === "true") { ev.preventDefault(); updateCheckout(true); return; }
+    $("status").textContent = "WhatsApp is opening. Press send there to place the order."; return;
+  }
+  if (t.closest("#copy")) {
+    var e = validate();
+    if (Object.keys(e).length) { updateCheckout(true); $("status").textContent = "Fill in the highlighted details first."; return; }
+    var txt = orderText(), done = function () { $("status").textContent = "Order text copied. Paste it in WhatsApp."; }, fail = function () { $("status").textContent = "Could not copy. Use the WhatsApp button instead."; };
+    try { navigator.clipboard.writeText(txt).then(done, fail); } catch (err) { fail(); }
+  }
+});
+document.addEventListener("input", function (ev) {
+  var t = ev.target;
+  if (t.id === "q") { state.q = t.value; var pos = t.selectionStart; render(); var n = $("q"); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} return; }
+  if (t.id === "max") { state.max = +t.value; $("maxv").textContent = inr(state.max); $("res").innerHTML = resHtml(filtered()); return; }
+  if (["name", "phone", "pin", "addr", "note"].indexOf(t.id) >= 0) {
+    if (t.id === "pin") t.value = t.value.replace(/\D/g, "");
+    form[t.id] = t.value; var box = $("f-" + t.id); if (box) box.dataset.touched = "1"; updateCheckout(false);
+  }
+});
+document.addEventListener("change", function (ev) {
+  var t = ev.target;
+  if (t.id === "sort") { state.sort = t.value; render(); }
+  if (t.id === "district") { form.district = t.value; $("f-district").dataset.touched = "1"; updateCheckout(false); }
+  if (t.name === "pay") { state.pay = t.value; updateCheckout(false); }
+});
+document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") closeCart(); });
+
+// ----- start -----
+cart = (store("br_cart") || []).filter(function (i) { return i && byId(i.id); });
+wish = (store("br_wish") || []).filter(byId);
+$("promo").textContent = SHOP.promo;
+$("shopnum").textContent = "+" + SHOP.whatsapp;
+renderCartBits(); render();
+</script>
+
+</body>
+</html>
